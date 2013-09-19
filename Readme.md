@@ -28,7 +28,7 @@ The service includes two major components:
 1. A catalog service that aggregrates station information from the included data providers, allowing developers to query stations of interest using geographic, temporal and other search parameters.
 2. A data service that provides a commony way to access time-series data from all providers by standardizing the request URLs and response file formats.  In addition, this service also standardizes returned units, when possible.
 
-Instructions on how to access data from these services can be found by pointing your browser to the installations homepage.
+Instructions on how to access data from these services can be found by pointing your browser to the root directory of your installation.
 
 ## Glider Data Service
 

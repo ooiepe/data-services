@@ -320,7 +320,10 @@ class RequestParams {
     if (strcasecmp($this->params['parameters'],'all')==0){
       $out = 'all';
     } else {
-      $parameters = array('air_temperature','air_pressure','salinity');
+      $parameters = array('air_pressure','air_temperature','depth','conductivity',
+      'salinity','water_temperature','significant_wave_height','peak_wave_period',
+      'mean_wave_period','wave_to_direction','wind_from_direction','wind_speed',
+      'wind_gust','relative_humidity','predicted_tide','measured_tide');
       $out=array();
       $items = explode(',',$this->params['parameters']);
       foreach ($items as $it) {

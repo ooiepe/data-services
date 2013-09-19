@@ -78,9 +78,9 @@ h3 {
 <p>Request data for a specific station.  Returns a csv file of time and observed values.</p>
 <p>Optional parameters:</p>
 <ul>
-  <li><strong>network</strong>: comma separated list of desired networks</li>
-  <li><strong>station</strong>: comma separated list of desired networks</li>
-  <li><strong>parameter</strong>: comma separated list of desired parameters (returns any matches, i.e. not just intersecting matches)</li>
+  <li><strong>network</strong>: should be NDBC or CO-OPS</li>
+  <li><strong>station</strong>: is the station's name, which can be found in the station listing</li>
+  <li><strong>parameter</strong>: desired parameter (currently, only one request at a time is supported)</li>
   <li><strong>start_time</strong>: Either 0000-00-00T00:00Z or number of days before end_time</li>
   <li><strong>end_time</strong>: Either 0000-00-00T00:00Z or 'now'.  Note, both start_time and end_time must be specified if either is given.</li>
   <li><strong>type</strong>: (optional): raw (default)</li>
