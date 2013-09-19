@@ -1,0 +1,7 @@
+.DS_STORE
+composer.lock
+config.php
+/vendor/
+/xml/*
+!/xml/README.md
+/old/
