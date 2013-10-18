@@ -43,6 +43,10 @@ function getData() {
   $app->etag($network . $station . $parameter . $dates['start_time'] . $dates['end_time']);
   $app->expires('+2 weeks');
 
+  $res = $app->response();
+  $res['Content-Type'] = 'text/csv';
+  $res['Access-Control-Allow-Origin'] = '*';
+
   // Step 2 - If period > 30 days, break up requests
   $max_interval = 60*60*24*30;
   if ($dates['end_time']-$dates['start_time']>$max_interval) {
