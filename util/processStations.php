@@ -34,7 +34,7 @@ $parameters = array(
 $network = 'CO-OPS';
 
 // Step 1: Open XML File
-$xmlLoc = '../xml/CO-OPS.xml';
+$xmlLoc = '../xml/co-ops.xml';
 $xml = @simplexml_load_file($xmlLoc);
 
 // Step 2: Loop through each station
