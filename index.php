@@ -7,6 +7,11 @@ $app = new \Slim\Slim(array(
   'templates.path' => 'templates',
 ));
 
+
+// Allow Cross Origin Scripting
+$res = $app->response();
+$res['Access-Control-Allow-Origin'] = '*';
+
 /**
  * Service Homepage
  * Path: /
