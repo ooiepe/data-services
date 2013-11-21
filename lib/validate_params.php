@@ -1,11 +1,11 @@
 <?php
 // Load Normalized Parameter List
-  require 'parameters.php';
+//  require 'parameters.php';
 
 /* validateParams Class
  * Used to setup and validate search parameters
  */
-class validateParams {
+class ValidateParams {
 	public $exceptions = array();
   private $allowedNetworks = array();
   private $allowedParameters = array();
@@ -178,34 +178,6 @@ class validateParams {
     }
   }
 
-}
-
-
-/**
- * Database Connection Class
- * Adapted from http://www.phpro.org/tutorials/Introduction-to-PHP-PDO.html
- */
-class db{
-  private static $instance = NULL;
-
-  private function __construct() {
-  }
-
-  public static function getInstance() {
-    if (!self::$instance) {
-      require('config.php');
-      $dbhost=$config['database']['host'];
-      $dbuser=$config['database']['login'];
-      $dbpass=$config['database']['password'];
-      $dbname=$config['database']['database'];
-      self::$instance = new PDO("mysql:host=$dbhost;dbname=$dbname", $dbuser, $dbpass);
-      self::$instance-> setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    }
-    return self::$instance;
-  }
-
-  private function __clone(){
-  }
 }
 
 ?>

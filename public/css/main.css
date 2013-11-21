@@ -1,0 +1,47 @@
+body {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 14px;
+/*   line-height: 18px; */
+  color: #333333;
+  background-color: #ffffff;
+  width: 640px;
+  margin-right: auto;
+  margin-left: auto;
+  *zoom: 1;
+  background: #eee;
+}
+
+}
+a {
+  color: #0088cc;
+  text-decoration: none;
+}
+a:hover,
+a:focus {
+  color: #005580;
+  text-decoration: underline;
+}
+#container {
+  background:#fff;
+  padding: 10px;
+}
+h1 {
+  text-decoration: underline;
+  font-size: 26px;
+}
+h2 {
+  font-size: 20px;
+}
+h3 {
+  font-size: 16px;
+  text-decoration: underline;
+  line-height: 0;
+  padding-top: 14px;
+}
+p {
+  margin-left: 22px;
+}
+
+.error {
+  color: #990000;
+}

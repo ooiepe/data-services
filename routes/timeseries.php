@@ -1,20 +1,9 @@
 <?php
-require 'vendor/autoload.php';
-require 'common_classes.php';
-
-// Prepare Slim app
-$app = new \Slim\Slim(array(
-  'templates.path' => 'templates',
-));
-
 /**
  * Data Request
  * Path: /
  */
-// Test URLs
-//  http://api.localhost/data.php?network=NDBC&station=44025&parameter=air_temperature&start_time=5&end_time=now
-//  http://api.localhost/data.php?network=CO-OPS&station=8635750&parameter=air_temperature&start_time=1&end_time=2013-07-01
-$app->get('/', 'getData');
+$app->get('/timeseries', 'getData');
 function getData() {
   global $normalizedParameters;
 
@@ -43,9 +32,10 @@ function getData() {
   $app->etag($network . $station . $parameter . $dates['start_time'] . $dates['end_time']);
   $app->expires('+2 weeks');
 
+  // Response Headers
   $res = $app->response();
   $res['Content-Type'] = 'text/csv';
-  $res['Access-Control-Allow-Origin'] = '*';
+  //$res['Access-Control-Allow-Origin'] = '*';
 
   // Step 2 - If period > 30 days, break up requests
   $max_interval = 60*60*24*30;
@@ -106,8 +96,12 @@ function getData() {
 
 }
 
-// Run Slim
-$app->run();
+// Test URLs
+//  http://api.localhost/timeseries?network=NDBC&station=44025&parameter=air_temperature&start_time=5&end_time=now
+//  http://api.localhost/timeseries?network=CO-OPS&station=8635750&parameter=air_temperature&start_time=1&end_time=2013-07-01
+
+
+
 
 
 /* csv_output
