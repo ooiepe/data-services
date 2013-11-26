@@ -119,6 +119,9 @@ class ValidateParams {
     if ($this->start_time > $this->end_time) {
       $this->exceptions[] = "Error: start_time can not be greater than end_time.";
     }
+    if (($this->end_time-$this->start_time)/(60*60*24) > 366.5) {
+      $this->exceptions[] = "Error: Requested date range cannot exceed 1 (leap) year.";
+    }
   }
   
   /**
