@@ -1,12 +1,12 @@
 <?php
 session_start(); // Add this to the top of the file
 
-require '../vendor/autoload.php';
+require 'vendor/autoload.php';
 
-require('../config.php');
-require('../lib/db.php');
-require('../lib/parameters.php');
-require('../lib/validate_params.php');
+require('config.php');
+require('lib/db.php');
+require('lib/parameters.php');
+require('lib/validate_params.php');
 
 /*
 // Automatically load library files
@@ -18,7 +18,7 @@ foreach ($files as $file) {
 
 // Prepare Slim app
 $app = new \Slim\Slim(array(
-  'templates.path' => '../templates',
+  'templates.path' => 'templates',
 ));
 
 // Allow Cross Origin Scripting
@@ -34,7 +34,7 @@ $app->get('/', function() use ($app) {
 });
 
 // Automatically load route files
-$files = glob('../routes/*.php');
+$files = glob('routes/*.php');
 foreach ($files as $file) {
   require_once $file;
 }
