@@ -14,27 +14,27 @@
 </ul>
 
 <h3>Full Parameter List</h3>
-<p>Example: <a href="parameters">/parameters</a></p>
+<p>Example: <a href="<?php echo $app_base?>/parameters">/parameters</a></p>
 <p>A full listing of all parameters available in the system.</p>
 <p>Returns a json array of all parameters</p>
 
 <h3>Parameter Details</h3>
-<p>Example: <a href="parameters/air_temperature">/parameters/air_temperature</a></p>
+<p>Example: <a href="<?php echo $app_base?>/parameters/air_temperature">/parameters/air_temperature</a></p>
 <p>Details for the specified parameter, given as /parameters/(name).</p>
 <p>Returns a json array of the selected parameter.</p>
 
 <h3>Full Station List </h3>
-<p>Example: <a href="stations">/stations</a></p>
+<p>Example: <a href="<?php echo $app_base?>/stations">/stations</a></p>
 <p>A full listing of all stations currently in the system.</p>
 <p>Returns a geojson array of all stations.</p>
 
 <h3>Station Details</h3>
-<p>Example: <a href="stations/NDBC/44025">/stations/NDBC/44025</a></p>
+<p>Example: <a href="<?php echo $app_base?>/stations/NDBC/44025">/stations/NDBC/44025</a></p>
 <p>Details for the specified station, given as /stations/(network)/(name).  (network) should be NDBC or CO-OPS.  (name) is the station's name, which can be found in the station listing.</p>
 <p>Returns a json array of the selected station.</p>
 
 <h3>Station Search</h3>
-<p>Example: <a href="stations/search?networks=CO-OPS&parameters=salinity&location=-77,35,-69,42&start_time=1&end_time=now">/stations/search?networks=CO-OPS&amp;parameters=salinity&amp;location=-77,35,-69,42&amp;start_time=1&amp;end_time=now</a></p>
+<p>Example: <a href="<?php echo $app_base?>/stations/search?networks=CO-OPS&parameters=salinity&location=-77,35,-69,42&start_time=1&end_time=now">/stations/search?networks=CO-OPS&amp;parameters=salinity&amp;location=-77,35,-69,42&amp;start_time=1&amp;end_time=now</a></p>
 <p>Search for stations within the specified criteria.</p>
 <p>Optional parameters:</p>
 <ul>
@@ -47,8 +47,8 @@
 <p>Returns a geojson array of all stations found.</p>
 
 <h3>Time-Series Data</h3>
-<p>Example: <a href="timeseries?network=NDBC&station=44025&parameter=air_temperature&start_time=5&end_time=now">/timeseries?network=NDBC&amp;station=44025&amp;parameter=air_temperature&amp;start_time=5&amp;end_time=now</a></p>
-<p>Example: <a href="timeseries?network=CO-OPS&station=8635750&parameter=air_temperature&start_time=1&end_time=2013-07-01">/timeseries?network=CO-OPS&amp;station=8635750&amp;parameter=air_temperature&amp;start_time=1&amp;end_time=2013-07-01</a></p>
+<p>Example: <a href="<?php echo $app_base?>/timeseries?network=NDBC&station=44025&parameter=air_temperature&start_time=5&end_time=now">/timeseries?network=NDBC&amp;station=44025&amp;parameter=air_temperature&amp;start_time=5&amp;end_time=now</a></p>
+<p>Example: <a href="<?php echo $app_base?>/timeseries?network=CO-OPS&station=8635750&parameter=air_temperature&start_time=1&end_time=2013-07-01">/timeseries?network=CO-OPS&amp;station=8635750&amp;parameter=air_temperature&amp;start_time=1&amp;end_time=2013-07-01</a></p>
 
 <p>Request time-series data for a specific station and parameter over the specified time range.</p>
 <p>Optional parameters:</p>

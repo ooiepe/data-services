@@ -2,6 +2,6 @@
 
 <h2>You have logged out.</h2>
 
-<p><a href="/">Back Home</a></p>
+<p><a href="<?php echo $app_base?>/">Return to Homepage</a></p>
 
 <?php include('footer.php');?>

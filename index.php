@@ -21,6 +21,13 @@ $app = new \Slim\Slim(array(
   'templates.path' => 'templates',
 ));
 
+// Set path for template views
+$app->hook('slim.before.dispatch', function() use ($app) {
+  $app->view()->appendData(array(
+    'app_base' => $app->request()->getRootUri()
+  ));
+});
+
 // Allow Cross Origin Scripting
 $res = $app->response();
 $res['Access-Control-Allow-Origin'] = '*';
