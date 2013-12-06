@@ -30,12 +30,22 @@ function getData() {
 
   // HTTP Caching
   $app->etag($network . $station . $parameter . $dates['start_time'] . $dates['end_time']);
-  $app->expires('+2 weeks');
+  if ( $dates['end_time']<(time()-60*60*24) ) {
+    $app->expires('+2 weeks'); //Older request, extend cache
+  } else {
+    $app->expires('+1 hour'); //Real-time request, limit cache
+  }
 
   // Response Headers
   $res = $app->response();
-  $res['Content-Type'] = 'text/csv';
-  //$res['Access-Control-Allow-Origin'] = '*';
+  //$res['Content-Type'] = 'text/csv';
+
+  // Local File Cache
+  $cache_file = $app->config('cache.path') . '/'. $network . $station . $parameter . $dates['start_time'] . $dates['end_time'];
+  if (checkCache($cache_file)) {
+    //var_dump("SERVED FROM CACHE");
+    $app->stop();
+  }
 
   // Step 2 - If period > 30 days, break up requests
   $max_interval = 60*60*24*30;
@@ -93,13 +103,18 @@ function getData() {
 
   // Write the CSV file
   csv_output($dataout);
-
+  
+  // Save the output to the cache (for requests ending at least 1-day ago) 
+  if ($dates['end_time']<(time()-60*60*24)) {
+    saveCache($cache_file, ob_get_contents());
+  }
+  //var_dump("SERVED LIVE");
+  
 }
 
 // Test URLs
 //  http://api.localhost/timeseries?network=NDBC&station=44025&parameter=air_temperature&start_time=5&end_time=now
 //  http://api.localhost/timeseries?network=CO-OPS&station=8635750&parameter=air_temperature&start_time=1&end_time=2013-07-01
-
 
 
 
@@ -161,6 +176,28 @@ function request_data($urls) {
   return $response;
 }
 
+/* checkCache 
+ * Chech for the specified cache file and echo it to the browser if available
+ * Also deletes older files to refresh cache (currently set at 30 days)
+ * Adapted from http://help.slimframework.com/discussions/questions/369-cache-app-render
+ */
+function checkCache($file) {
+  if (!file_exists($file)) {
+    return false;
+  }
+  if (filectime($file)<(time()-60*60*24*30)) {
+    unlink($file);
+    return false;
+  }
+  readfile($file);
+  return true;
+}
 
+/* saveCache 
+ * Save the contents to the specified file
+ */
+function saveCache($file, $contents) {
+  file_put_contents($file, $contents);
+}
 
 ?>

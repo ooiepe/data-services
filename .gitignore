@@ -5,3 +5,5 @@ config.php
 /xml/*
 !/xml/README.md
 /old/
+/cache/*
+!/cache/README.md

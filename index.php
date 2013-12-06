@@ -19,6 +19,7 @@ foreach ($files as $file) {
 // Prepare Slim app
 $app = new \Slim\Slim(array(
   'templates.path' => 'templates',
+  'cache.path' => 'cache',
 ));
 
 // Set path for template views
