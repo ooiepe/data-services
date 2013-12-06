@@ -1,4 +1,5 @@
 <?php
+session_cache_limiter(false);
 session_start(); // Add this to the top of the file
 
 require 'vendor/autoload.php';
