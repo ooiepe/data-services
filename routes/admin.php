@@ -14,7 +14,7 @@ $authenticateForRole = function () {
  */
 $app->get('/admin', $authenticateForRole('admin'), function () use ($app) {
   $app->render('admin_menu.php');
-});
+})->name('admin');
 
 /**
  * Login
@@ -35,7 +35,7 @@ $app->map("/login", function () use ($app) {
       // Check for valid login
       if($username == $config['login']['username'] && $password == $config['login']['password']) {
         $_SESSION['admin'] = true;
-        $app->redirect('/admin');
+        $app->redirect($app->urlFor('admin'));
       } else {
         $error = "Username and password are not correct";
       }
