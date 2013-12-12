@@ -4,7 +4,7 @@ $authenticateForRole = function () {
     if (!isset($_SESSION['admin'])) {
       $app = \Slim\Slim::getInstance();
       $app->flash('error', 'Login required');
-      $app->redirect('/login');
+      $app->redirect($app->urlFor('login'));
     }    
   };
 };
@@ -44,7 +44,7 @@ $app->map("/login", function () use ($app) {
     }
   }  
   $app->render('login.php',array('error'=>$error));
-})->via('GET','POST');
+})->via('GET','POST')->name('login');
 
 /**
  * Logout
