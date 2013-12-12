@@ -12,7 +12,7 @@ $app->get('/load/parameters', $authenticateForRole('admin'), function () use ($a
  */
 $app->get('/load/ndbc', $authenticateForRole('admin'), function () use ($app) {
   $u = 'http://sdf.ndbc.noaa.gov/sos/server.php?VERSION=1.0.0&SERVICE=SOS&REQUEST=GetCapabilities';
-  $xml = simplexml_load_string(file_get_contents($u));
+  $xml = simplexml_load_string(url_get_contents($u));
   $output = parseSOS($xml,'NDBC');
   $app->render('report.php',array('output'=>$output));
 });
@@ -22,10 +22,27 @@ $app->get('/load/ndbc', $authenticateForRole('admin'), function () use ($app) {
  */
 $app->get('/load/co-ops', $authenticateForRole('admin'), function () use ($app) {
   $u = 'http://opendap.co-ops.nos.noaa.gov/ioos-dif-sos/SOS?service=SOS&request=GetCapabilities';
-  $xml = simplexml_load_string(file_get_contents($u));
+  $xml = simplexml_load_string(url_get_contents($u));
   $output = parseSOS($xml,'CO-OPS');
   $app->render('report.php',array('output'=>$output));
 });
+
+
+/* -------------------------------------------------- */
+/**
+ * Basic Curl Request
+ */
+function url_get_contents($url) {
+  if (!function_exists('curl_init')){ 
+    die('CURL is not installed!');
+  }
+  $ch = curl_init();
+  curl_setopt($ch, CURLOPT_URL, $url);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+  $output = curl_exec($ch);
+  curl_close($ch);
+  return $output;
+}
 
 
 /* -------------------------------------------------- */
