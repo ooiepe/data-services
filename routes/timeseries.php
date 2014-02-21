@@ -1,128 +1,100 @@
 <?php
 /**
- * Data Request
- * Path: /
+ * Timeseries Data Request
+ * Path: /timeseries
  */
 $app->get('/timeseries', 'getData');
+
+/**
+ * Slim callback for Timeseries Data Request
+ */
 function getData() {
   global $normalizedParameters;
 
   $app = \Slim\Slim::getInstance();
   $req = $app->request();
 
-  // Step 1 - Validate Parameters
+  // Validate Parameters
   $valid = new validateParams();
 	$valid->validateNetworks($req->get('network'));
   $valid->validateStations($req->get('station'));
 	$valid->validateParameters($req->get('parameter'));
 	$valid->validateTimes($req->get('start_time'),$req->get('end_time'));
   if (count($valid->exceptions) > 0) {
-    echo '{"error":'. json_encode($valid->exceptions) .'}';
-    exit;
+    jsonOutput(400,array('error'=>$valid->exceptions));
+    $app->stop();
   }
   $network = $valid->networks[0];
   $station = $valid->stations[0];
   $parameter = $valid->parameters[0];  
   $parameter_request =  $normalizedParameters[$network][$parameter]['request'];
   $parameter_response = $normalizedParameters[$network][$parameter]['response'];  
-  $dates['start_time'] = $valid->start_time;
-  $dates['end_time'] = $valid->end_time;
+  $start_time = $valid->start_time;
+  $end_time = $valid->end_time;
+
+  // Response Header
+  $app->contentType('text/csv');
 
   // HTTP Caching
-  $app->etag($network . $station . $parameter . $dates['start_time'] . $dates['end_time']);
-  if ( $dates['end_time']<(time()-60*60*24) ) {
+  $app->etag($network . $station . $parameter . $start_time . $end_time);
+  if ( $end_time<(time()-60*60*24) ) {
     $app->expires('+2 weeks'); //Older request, extend cache
   } else {
     $app->expires('+1 hour'); //Real-time request, limit cache
   }
-
-  // Response Headers
-  $res = $app->response();
-  //$res['Content-Type'] = 'text/csv';
-
+  
   // Local File Cache
-  $cache_file = $app->config('cache.path') . '/'. $network . $station . $parameter . $dates['start_time'] . $dates['end_time'];
+  $cache_file = $app->config('cache.path') . '/'. $network . $station . $parameter . $start_time . $end_time;
   if (checkCache($cache_file)) {
     //var_dump("SERVED FROM CACHE");
     $app->stop();
   }
 
-  // Step 2 - If period > 30 days, break up requests
-  $max_interval = 60*60*24*30;
-  if ($dates['end_time']-$dates['start_time']>$max_interval) {
-    $reqs = range($dates['start_time'],$dates['end_time'],$max_interval);
-    $reqs[] = $dates['end_time'];
-  } else {
-    $reqs[] = $dates['start_time'];
-    $reqs[] = $dates['end_time'];
-  }
-  for ($i=0;$i<count($reqs)-1;$i++) {
-    if ($network=='ndbc') {
-      $urls[$i] = 'http://sdf.ndbc.noaa.gov/sos/server.php?request=GetObservation&service=SOS&version=1.0.0&offering=urn:ioos:station:wmo:' . $station . '&observedproperty=' . $parameter_request . '&responseformat=text/csv&eventtime=' . gmdate("Y-m-d\TH:i:s\Z",$reqs[$i]) . '/' . gmdate("Y-m-d\TH:i:s\Z",$reqs[$i+1]);
-    } elseif ($network=='co-ops') {
-      $urls[$i] = 'http://opendap.co-ops.nos.noaa.gov/ioos-dif-sos/SOS?request=GetObservation&service=SOS&version=1.0.0&offering=urn:ioos:station:NOAA.NOS.CO-OPS:' . $station . '&observedproperty=' . $parameter_request . '&responseformat=text/csv&eventtime=' . gmdate("Y-m-d\TH:i:s\Z",$reqs[$i]) . '/' . gmdate("Y-m-d\TH:i:s\Z",$reqs[$i+1]);  
-    }  
-  }
-  //echo "<pre>";
-  //print_r($urls);
+  $start = microtime(true);
 
-  // Step 3 - Request data asynchronously and cat it together
-  $data = request_data($urls);
-
-  // Check for error and extract header line
-  if (preg_match("/xml version/i", $data)) {
-    echo '{"error":"Invalid request","url":'.$urls[0].',"response":'.htmlspecialchars($data).';}';
-    exit;
-  } else {
-    preg_match('/^station_id?.+/i',	$data, $matches);
-    $header = $matches[0];
-  }
-  // Remove header and blank lines
-  $data = preg_replace('/station_id+.+[\r\n]/',"", $data);
-  $data = preg_replace("/(^[\r\n]*|[\r\n]+)[\s\t]*[\r\n]+/","",$data);
-
-  // Create a header index
-  $headers = str_getcsv($header);
-  $col2idx=null;
-  foreach ($headers as $h) {
-    $col2idx[$h] = count($col2idx);
-    if (preg_match("/^$parameter_response \((.*)\)$/",$h,$matches)) {
-      $uomOrig = $matches[1];
-    }
-  }
-
-  // Step 5 - Parse data and extract only the desired variable column
-  $dataout[] = array('date',"$parameter ($uomOrig)");
-  $datalines = explode("\n",$data);
-  foreach ($datalines as $dataline) {
-    $d = str_getcsv($dataline); 
-    if (count($d)>1) {
-      $dataout[] = array($d[$col2idx['date_time']], $d[$col2idx["$parameter_response ($uomOrig)"]]);
-    }
-  }
-
+  $dh = new DataHandler;
+  $data = $dh->getObservations($network,$station,$parameter,$parameter_request,$parameter_response,$start_time,$end_time);
+  
   // Write the CSV file
-  csv_output($dataout);
+  csvOutput($data);
+  //echo '<pre>';
+  //print_r($data);
   
   // Save the output to the cache (for requests ending at least 1-day ago) 
   if ($dates['end_time']<(time()-60*60*24)) {
     saveCache($cache_file, ob_get_contents());
   }
   //var_dump("SERVED LIVE");
-  
+
+  //echo "...done in " . (microtime(true) - $start) . PHP_EOL;
+  //print('Peak Memory:' . memory_get_peak_usage()/1024/1024 . 'MB');  
 }
 
-// Test URLs
-//  http://api.localhost/timeseries?network=NDBC&station=44025&parameter=air_temperature&start_time=5&end_time=now
-//  http://api.localhost/timeseries?network=CO-OPS&station=8635750&parameter=air_temperature&start_time=1&end_time=2013-07-01
-
-
-
-
-/* csv_output
- * Adapted from http://php.net/manual/en/function.fputcsv.php
+/**
+ * Outputs a response in json format
+ *
+ * Adapted from http://www.androidhive.info/2014/01/how-to-create-rest-api-for-android-app-using-php-slim-and-mysql-day-23/
+ * @param string $status_code HTTP response code
+ * @param array $response Array of data for JSON response
  */
-function csv_output($data) {
+function jsonOutput($status_code, $response) {
+  $app = \Slim\Slim::getInstance();
+  // Http response code
+  $app->status($status_code);
+ 
+  // setting response content type to json
+  $app->contentType('application/json');
+ 
+  echo json_encode($response);
+}
+
+/**
+ * Outputs a response in csv format
+ *
+ * Adapted from http://php.net/manual/en/function.fputcsv.php
+ * @param array $data Array of data to output
+ */ 
+function csvOutput($data) {
   $outstream = fopen("php://output", 'w');
   function __outputCSV(&$vals, $key, $filehandler) {
     fputcsv($filehandler, $vals, ',', '"');
@@ -131,55 +103,14 @@ function csv_output($data) {
   fclose($outstream);
 }
 
-/* request_data 
- * Request data asynchronously from third-party web services using curl_multi
- * Adapted from http://www.sitepoint.com/using-curl-for-remote-requests/
- */
-function request_data($urls) {
-  // initialize the multihandler
-  $session = curl_multi_init();
 
-  $channels = array();
-  foreach ($urls as $key => $url) {
-    // initiate individual channel
-    $channels[$key] = curl_init();
-    curl_setopt_array($channels[$key], array(
-      CURLOPT_URL => $url,
-      CURLOPT_RETURNTRANSFER => true,
-      CURLOPT_FOLLOWLOCATION => true
-    ));
- 
-    // add channel to multihandler
-    curl_multi_add_handle($session, $channels[$key]);
-    //echo curl_exec($channels[$key]);
-    //curl_close($channels[$key]);
-  }
-
-  // execute - if there is an active connection then keep looping
-  $active = null;
-  do {
-    $status = curl_multi_exec($session, $active);
-    curl_multi_select($session);
-  } while ($active>0);
-  $response = '';
-
-  // echo the content, remove the handlers, then close them
-  foreach ($channels as $chan) {
-    $response .= curl_multi_getcontent($chan);
-    //print_r(curl_getinfo($chan));
-    curl_multi_remove_handle($session, $chan);
-    //curl_close($chan);
-  }
-
-  // close the multihandler
-  curl_multi_close($session);
-  return $response;
-}
-
-/* checkCache 
- * Chech for the specified cache file and echo it to the browser if available
+/**
+ * Check for the specified cache file and echo it to the browser if available
+ *
  * Also deletes older files to refresh cache (currently set at 30 days)
  * Adapted from http://help.slimframework.com/discussions/questions/369-cache-app-render
+ * @param string $file Cache file (full path)
+ * @return bool
  */
 function checkCache($file) {
   if (!file_exists($file)) {
@@ -193,8 +124,12 @@ function checkCache($file) {
   return true;
 }
 
-/* saveCache 
- * Save the contents to the specified file
+
+/** 
+ * Save contents to a specified file
+ *
+ * @param string $file Cache file (full path)
+ * @param string $contents Contents to write to the file
  */
 function saveCache($file, $contents) {
   file_put_contents($file, $contents);

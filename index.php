@@ -8,6 +8,7 @@ require('config.php');
 require('lib/db.php');
 require('lib/parameters.php');
 require('lib/validate_params.php');
+require('lib/data_handler.php');
 
 /*
 // Automatically load library files
